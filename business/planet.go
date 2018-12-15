@@ -2,18 +2,11 @@ package business
 
 import (
 	"encoding/json"
-	"errors"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"time"
 )
-
-var PlanetHasNoMoviesError error
-
-func init() {
-	PlanetHasNoMoviesError = errors.New("This planet has no movies. Try to add a planet that has movie.")
-}
 
 type Planet struct {
 	Name        string `bson: "name", json: "name"`
@@ -141,9 +134,11 @@ func getMoviesCount(planet Planet) (int, error) {
 	}
 
 	if len(swapiResponse.Results) == 0 {
-		return 0, PlanetHasNoMoviesError
+		return 0, nil
+	} else if swapiResponse.Results[0].Name != planetName {
+		return 0, nil
 	} else if len(swapiResponse.Results[0].Films) == 0 {
-		return 0, PlanetHasNoMoviesError
+		return 0, nil
 	} else {
 		return len(swapiResponse.Results[0].Films), err
 	}

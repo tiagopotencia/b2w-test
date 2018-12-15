@@ -54,15 +54,6 @@ func AddPlanet(c *gin.Context) {
 	c.BindJSON(&planet)
 	err := business.AddPlanetBusiness(planet, DB)
 
-	if err == business.PlanetHasNoMoviesError {
-		log.Print(err)
-		c.JSON(http.StatusUnprocessableEntity, response{
-			StatusCode: http.StatusUnprocessableEntity,
-			Message:    err.Error(),
-		})
-		return
-	}
-
 	if err != nil {
 		log.Print(err)
 		c.JSON(http.StatusInternalServerError, response{
