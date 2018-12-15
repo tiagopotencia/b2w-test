@@ -6,13 +6,16 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+
+	"gopkg.in/mgo.v2/bson"
 )
 
 type Planet struct {
-	Name        string `bson: "name", json: "name"`
-	Climate     string `bson: "climate", json: "climate"`
-	Terrain     string `bson: "terrain", json: "terrain"`
-	MoviesCount int    `json: "moviesCount,omitempty"`
+	Id          bson.ObjectId `json:"id" bson:"_id,omitempty"`
+	Name        string        `bson: "name", json: "name"`
+	Climate     string        `bson: "climate", json: "climate"`
+	Terrain     string        `bson: "terrain", json: "terrain"`
+	MoviesCount int           `json: "moviesCount,omitempty"`
 }
 
 type SwapiPlanetResponse struct {
