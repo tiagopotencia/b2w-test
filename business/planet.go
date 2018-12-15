@@ -95,6 +95,18 @@ func GetPlanetsByName(name string, db DatabaseInterface) ([]Planet, error) {
 func GetPlanetByID(ID string, db DatabaseInterface) (*Planet, error) {
 	planet, err := db.GetPlanetByID(ID)
 
+	if err != nil {
+		return nil, err
+	}
+
+	if planet == nil {
+		return nil, nil
+	}
+
+	moviesCount, err := getMoviesCount(*planet)
+
+	planet.MoviesCount = moviesCount
+
 	return planet, err
 }
 
