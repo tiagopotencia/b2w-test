@@ -13,6 +13,7 @@ const (
 	INTERNAL_SERVER_ERROR_DEFAULT_MESSAGE = "An error has occurred. Please try again later"
 	PLANET_ID_NOT_FOUND_MESSAGE           = "Planet ID not found"
 	PLANET_DELETED_MESSAGE                = "Planet deleted successfully"
+	PLANET_CREATED_SUCCESSFULLY_MESSAGE   = "Planet has beed created sucessfully"
 )
 
 var DB *business.Database
@@ -52,7 +53,16 @@ func AddPlanet(c *gin.Context) {
 
 	c.BindJSON(&planet)
 	err := business.AddPlanetBusiness(planet, DB)
-	err = nil
+
+	if err == business.PlanetHasNoMoviesError {
+		log.Print(err)
+		c.JSON(http.StatusUnprocessableEntity, response{
+			StatusCode: http.StatusUnprocessableEntity,
+			Message:    err.Error(),
+		})
+		return
+	}
+
 	if err != nil {
 		log.Print(err)
 		c.JSON(http.StatusInternalServerError, response{
@@ -62,7 +72,10 @@ func AddPlanet(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, nil)
+	c.JSON(http.StatusCreated, response{
+		StatusCode: http.StatusCreated,
+		Message:    PLANET_CREATED_SUCCESSFULLY_MESSAGE,
+	})
 }
 
 func GetPlanets(c *gin.Context) {
