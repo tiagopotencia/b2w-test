@@ -9,11 +9,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	INTERNAL_SERVER_ERROR_DEFAULT_MESSAGE = "An error has occurred. Please try again later"
+	PLANET_ID_NOT_FOUND_MESSAGE           = "Planet ID not found"
+	PLANET_DELETED_MESSAGE                = "Planet deleted successfully"
+)
+
 var DB *business.Database
 
 type response struct {
 	StatusCode int         `json:"statusCode"`
-	Message    string      `json:"message"`
+	Message    string      `json:"message,omitempty"`
 	Content    interface{} `json:"content,omitempty"`
 }
 
@@ -49,7 +55,11 @@ func AddPlanet(c *gin.Context) {
 	err = nil
 	if err != nil {
 		log.Print(err)
-		c.JSON(http.StatusInternalServerError, err)
+		c.JSON(http.StatusInternalServerError, response{
+			StatusCode: http.StatusInternalServerError,
+			Message:    INTERNAL_SERVER_ERROR_DEFAULT_MESSAGE,
+		})
+		return
 	}
 
 	c.JSON(http.StatusCreated, nil)
@@ -70,7 +80,10 @@ func GetPlanets(c *gin.Context) {
 
 	if err != nil {
 		log.Print(err)
-		c.AbortWithStatusJSON(http.StatusInternalServerError, err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, response{
+			StatusCode: http.StatusInternalServerError,
+			Message:    INTERNAL_SERVER_ERROR_DEFAULT_MESSAGE,
+		})
 		return
 	}
 
@@ -83,21 +96,23 @@ func getPlanetByID(c *gin.Context) {
 
 	if err != nil {
 		log.Print(err)
-		c.AbortWithStatusJSON(http.StatusInternalServerError, err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, response{
+			StatusCode: http.StatusInternalServerError,
+			Message:    INTERNAL_SERVER_ERROR_DEFAULT_MESSAGE,
+		})
 		return
 	}
 
 	if planet == nil {
 		c.AbortWithStatusJSON(http.StatusNotFound, response{
 			StatusCode: http.StatusNotFound,
-			Message:    "Planet ID not found",
+			Message:    PLANET_ID_NOT_FOUND_MESSAGE,
 		})
 		return
 	}
 
 	c.JSON(http.StatusOK, response{
 		StatusCode: http.StatusOK,
-		Message:    "Planet found:",
 		Content:    &planet,
 	})
 }
@@ -110,7 +125,7 @@ func deletePlanet(c *gin.Context) {
 		log.Println(err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, response{
 			StatusCode: http.StatusInternalServerError,
-			Message:    "An error has occurred. Please try again later",
+			Message:    INTERNAL_SERVER_ERROR_DEFAULT_MESSAGE,
 		})
 		return
 	}
@@ -118,13 +133,13 @@ func deletePlanet(c *gin.Context) {
 	if planetDeleted == false {
 		c.AbortWithStatusJSON(http.StatusNotFound, response{
 			StatusCode: http.StatusNotFound,
-			Message:    "Planet ID not found",
+			Message:    PLANET_ID_NOT_FOUND_MESSAGE,
 		})
 		return
 	}
 
 	c.JSON(http.StatusNoContent, response{
 		StatusCode: http.StatusAccepted,
-		Message:    "Planet deleted successfully",
+		Message:    PLANET_DELETED_MESSAGE,
 	})
 }
