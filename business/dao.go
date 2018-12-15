@@ -87,6 +87,10 @@ func (d *Database) GetPlanetsByName(name string) ([]Planet, error) {
 	c := session.DB(d.DbName).C(COLLECTION)
 	err := c.Find(bson.M{"name": name}).All(&result)
 
+	if err == mgo.ErrNotFound {
+		return result, nil
+	}
+
 	return result, err
 }
 
@@ -102,6 +106,10 @@ func (d *Database) GetPlanetByID(ID string) (*Planet, error) {
 
 	c := session.DB(d.DbName).C(COLLECTION)
 	err := c.FindId(bson.ObjectIdHex(ID)).One(&result)
+
+	if err == mgo.ErrNotFound {
+		return nil, nil
+	}
 
 	return &result, err
 }
