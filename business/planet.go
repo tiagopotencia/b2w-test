@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
-	"log"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -46,11 +46,22 @@ type SwapiPlanetResponse struct {
 
 func GetPlanetsBusiness(db DatabaseInterface) ([]Planet, error) {
 
-	planetList, err := db.GetPlanetFromDatabase()
+	planetsList, err := db.GetPlanetFromDatabase()
 	if err != nil {
-		log.Println(err)
+		return planetsList, nil
 	}
-	return planetList, nil
+
+	for i, e := range planetsList {
+		moviesCount, err := getMoviesCount(e)
+
+		if err != nil {
+			return nil, err
+		}
+
+		planetsList[i].MoviesCount = moviesCount
+	}
+
+	return planetsList, nil
 }
 
 func AddPlanetBusiness(planet Planet, db DatabaseInterface) error {
@@ -67,6 +78,17 @@ func AddPlanetBusiness(planet Planet, db DatabaseInterface) error {
 
 func GetPlanetsByName(name string, db DatabaseInterface) ([]Planet, error) {
 	planetsList, err := db.GetPlanetsByName(name)
+
+	for i, e := range planetsList {
+		moviesCount, err := getMoviesCount(e)
+
+		if err != nil {
+			return nil, err
+		}
+
+		planetsList[i].MoviesCount = moviesCount
+	}
+
 	return planetsList, err
 }
 
@@ -91,7 +113,7 @@ func getMoviesCount(planet Planet) (int, error) {
 
 	var planetName = planet.Name
 
-	response, err := client.Get("https://swapi.co/api/planets?search=" + planetName)
+	response, err := client.Get("https://swapi.co/api/planets?search=" + url.QueryEscape(planetName))
 	if err != nil {
 		return 0, err
 	}
