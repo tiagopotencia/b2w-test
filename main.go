@@ -17,6 +17,7 @@ const (
 )
 
 var DB *business.Database
+var Swapi *business.Swapi
 
 type response struct {
 	StatusCode int         `json:"statusCode"`
@@ -24,9 +25,15 @@ type response struct {
 	Content    interface{} `json:"content,omitempty"`
 }
 
+func init() {
+}
+
 func main() {
 	db := business.Database{}
 	DB = &db
+
+	swapi := business.Swapi{}
+	Swapi = &swapi
 	err := DB.ConnectToDB("mongodb://tp:b2w-test@ds247759.mlab.com:47759/", "b2w-test")
 
 	if err != nil {
@@ -77,9 +84,9 @@ func GetPlanets(c *gin.Context) {
 	planetNameFilter := c.Query("name")
 
 	if planetNameFilter != "" {
-		result, err = business.GetPlanetsByName(planetNameFilter, DB)
+		result, err = business.GetPlanetsByName(planetNameFilter, DB, Swapi)
 	} else {
-		result, err = business.GetPlanetsBusiness(DB)
+		result, err = business.GetPlanetsBusiness(DB, Swapi)
 	}
 
 	if err != nil {
@@ -96,7 +103,7 @@ func GetPlanets(c *gin.Context) {
 
 func getPlanetByID(c *gin.Context) {
 	ID := c.Param("ID")
-	planet, err := business.GetPlanetByID(ID, DB)
+	planet, err := business.GetPlanetByID(ID, DB, Swapi)
 
 	if err != nil {
 		log.Print(err)
@@ -142,7 +149,7 @@ func deletePlanet(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusNoContent, response{
+	c.JSON(http.StatusOK, response{
 		StatusCode: http.StatusAccepted,
 		Message:    PLANET_DELETED_MESSAGE,
 	})

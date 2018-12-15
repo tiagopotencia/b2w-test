@@ -37,7 +37,7 @@ type SwapiPlanetResponse struct {
 	} `json:"results"`
 }
 
-func GetPlanetsBusiness(db DatabaseInterface) ([]Planet, error) {
+func GetPlanetsBusiness(db DatabaseInterface, swapi SwapiInterface) ([]Planet, error) {
 
 	planetsList, err := db.GetPlanetFromDatabase()
 	if err != nil {
@@ -45,7 +45,7 @@ func GetPlanetsBusiness(db DatabaseInterface) ([]Planet, error) {
 	}
 
 	for i, e := range planetsList {
-		moviesCount, err := getMoviesCount(e)
+		moviesCount, err := swapi.GetMoviesCount(e)
 
 		if err != nil {
 			return nil, err
@@ -58,22 +58,15 @@ func GetPlanetsBusiness(db DatabaseInterface) ([]Planet, error) {
 }
 
 func AddPlanetBusiness(planet Planet, db DatabaseInterface) error {
-
-	_, err := getMoviesCount(planet)
-
-	if err != nil {
-		return err
-	}
-
-	err = db.AddPlanetToDatabase(planet)
+	err := db.AddPlanetToDatabase(planet)
 	return err
 }
 
-func GetPlanetsByName(name string, db DatabaseInterface) ([]Planet, error) {
+func GetPlanetsByName(name string, db DatabaseInterface, swapi SwapiInterface) ([]Planet, error) {
 	planetsList, err := db.GetPlanetsByName(name)
 
 	for i, e := range planetsList {
-		moviesCount, err := getMoviesCount(e)
+		moviesCount, err := swapi.GetMoviesCount(e)
 
 		if err != nil {
 			return nil, err
@@ -85,7 +78,7 @@ func GetPlanetsByName(name string, db DatabaseInterface) ([]Planet, error) {
 	return planetsList, err
 }
 
-func GetPlanetByID(ID string, db DatabaseInterface) (*Planet, error) {
+func GetPlanetByID(ID string, db DatabaseInterface, swapi SwapiInterface) (*Planet, error) {
 	planet, err := db.GetPlanetByID(ID)
 
 	if err != nil {
@@ -96,7 +89,7 @@ func GetPlanetByID(ID string, db DatabaseInterface) (*Planet, error) {
 		return nil, nil
 	}
 
-	moviesCount, err := getMoviesCount(*planet)
+	moviesCount, err := swapi.GetMoviesCount(*planet)
 
 	planet.MoviesCount = moviesCount
 
