@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/tiagopotencia/i-am-back/business"
+	"github.com/tiagopotencia/b2w-test/business"
 
 	"github.com/gin-gonic/gin"
 )
